@@ -100,4 +100,39 @@ class BankTest extends TestCase
     }
 
 
+    public function test_balance_is_not_enough()
+    {
+
+        //---------------------
+        //      prepare Data
+        //---------------------
+        /** @var CreditCard $creditCard */
+        $sourceCreditCard = CreditCard::factory()->create();
+        $sourceBalance = $sourceCreditCard->bankAccount->balance;
+
+        $sourceCreditCard->bankAccount()->update(['balance' => 200]);
+
+        /** @var CreditCard $destinationCreditCard */
+        $destinationCreditCard = CreditCard::factory()->create();
+        $destinationBalance = $destinationCreditCard->bankAccount->balance;
+
+        //---------------------
+        //      perform Action
+        //---------------------
+
+        $transferMoney = rand(111, 999) * 1000;
+        $response = $this->postJson(self::URL,
+            [
+                "source_card_number"      => $sourceCreditCard->number,
+                "destination_card_number" => $destinationCreditCard->number,
+                "amount"                  => $transferMoney
+            ]
+        )
+            ->assertStatus(400)
+            ->assertJson([
+                "message" => "balance is not enough"
+            ])
+            ->json();
+
+    }
 }
