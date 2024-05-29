@@ -8,3 +8,7 @@ Route::post("/transfer", [BankAccountController::class, 'transfer']);
 
 Route::get('top-users-transactions', [BankAccountController::class, 'topUsersWithTransactions']);
 
+
+Route::get("/valid", function () {
+    return validCardBank();
+});
