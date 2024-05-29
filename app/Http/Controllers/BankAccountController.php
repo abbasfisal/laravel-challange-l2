@@ -15,8 +15,8 @@ class BankAccountController extends Controller
 
     public function transfer(TransferRequest $request)
     {
-
-         return $this->service->transfer($request->validated());
+        return $this->service->transfer($request->validated());
+    }
 
 //        dd('s');
 
