@@ -28,4 +28,15 @@ class Transaction extends Model
         return $this->hasMany(TransactionFee::class);
     }
 
+
+    public function sourceCard(): BelongsTo
+    {
+        return $this->belongsTo(CreditCard::class, 'source_card_id');
+    }
+
+    public function destinationCard(): BelongsTo
+    {
+        return $this->belongsTo(CreditCard::class, 'destination_card_id');
+    }
+
 }
