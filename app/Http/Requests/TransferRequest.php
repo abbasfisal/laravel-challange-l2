@@ -23,7 +23,7 @@ class TransferRequest extends FormRequest
     {
         return [
             'source_card_number'      => ['required', 'integer', new ValidIranCreditCardNumber(), 'digits:16', 'exists:credit_cards,number'],
-            'destination_card_number' => ['required', 'integer', 'digits:16', 'exists:credit_cards,number'],
+            'destination_card_number' => ['required', 'integer', new ValidIranCreditCardNumber(), 'digits:16', 'exists:credit_cards,number'],
             'amount'                  => ['required', 'integer', 'min:1000', 'max:50000000'],
         ];
     }
