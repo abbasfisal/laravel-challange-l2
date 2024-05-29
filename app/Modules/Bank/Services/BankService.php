@@ -37,4 +37,9 @@ class BankService implements BankServiceInterface
 
         return response()->json(['message' => 'Transfer money was successful'], 201);
     }
+
+    public function getTopUserByTransactions()
+    {
+        return $this->repository->getLatestTenMinuteTransactions();
+    }
 }

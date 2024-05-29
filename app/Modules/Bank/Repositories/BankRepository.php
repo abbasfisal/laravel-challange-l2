@@ -5,7 +5,10 @@ namespace App\Modules\Bank\Repositories;
 use App\Models\CreditCard;
 use App\Models\Transaction;
 use App\Models\TransactionFee;
+use App\Models\User;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -29,7 +32,7 @@ class BankRepository implements BankRepositoryInterface
             ->first();
     }
 
-    public function updateBalance(array $data)
+    public function updateBalance(array $data): bool|array
     {
 
         DB::beginTransaction();
@@ -85,6 +88,43 @@ class BankRepository implements BankRepositoryInterface
         }
     }
 
+    public function getLatestTenMinuteTransactions(): Collection|array
+    {
+
+        //get transactions by time
+        /** @var Transaction $recentTransactions */
+        $recentTransactions = Transaction::query()->where('created_at', '>=', Carbon::now()->subMinutes(10))->get();
+
+
+        //group transaction by user
+        $userTransactionCounts = $recentTransactions->groupBy(function ($transaction) {
+            return $transaction->sourceCard->bankAccount->user_id;
+        })->map(function ($transactions, $userId) {
+            return [
+                'user_id' => $userId,
+                'count'   => $transactions->count()
+            ];
+        })->sortByDesc('count')->take(3);
+
+
+        $result = [];
+
+        foreach ($userTransactionCounts as $user) {
+            $userId = $user['user_id'];
+            $userModel = User::query()->find($userId);
+            $lastTenTransactions = Transaction::query()->whereHas('sourceCard.bankAccount', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->orWhereHas('destinationCard.bankAccount', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->orderBy('created_at', 'desc')->take(10)->get();
+
+            $result[] = [
+                'user'         => $userModel,
+                'transactions' => $lastTenTransactions
+            ];
+        }
+
+        return $result;
+    }
 }
 
-//todo: bala ro anjam bede

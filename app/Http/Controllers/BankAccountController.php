@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TransferRequest;
+use App\Http\Resources\TopUserTransactions;
 use App\Modules\Bank\Services\BankServiceInterface;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 
 class BankAccountController extends Controller
@@ -18,7 +20,9 @@ class BankAccountController extends Controller
         return $this->service->transfer($request->validated());
     }
 
-//        dd('s');
-
+    public function topUsersWithTransactions(): AnonymousResourceCollection
+    {
+        $result = $this->service->getTopUserByTransactions();
+        return TopUserTransactions::collection($result);
     }
 }
