@@ -3,6 +3,7 @@
 namespace App\Modules\Bank\Services;
 
 
+use App\Jobs\SmsNotification;
 use App\Modules\Bank\Repositories\BankRepositoryInterface;
 use App\Modules\Sms\Enums\Action;
 use App\Modules\Sms\SmsFactory;
@@ -15,9 +16,11 @@ class BankService implements BankServiceInterface
     {
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function transfer(array $data)
     {
-
         $source = $this->repository->GetAccountBy($data['source_card_number']);
         $balance = $source->bankAccount->balance;
 

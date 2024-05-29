@@ -4,11 +4,8 @@ namespace App\Modules\Bank\Repositories;
 
 use App\Models\CreditCard;
 use App\Models\Transaction;
-use App\Models\TransactionFee;
-use App\Models\User;
+use App\Models\TransactionLog;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +21,9 @@ class BankRepository implements BankRepositoryInterface
             ->first();
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function updateBalance(array $data): array
     {
 
@@ -40,25 +40,34 @@ class BankRepository implements BankRepositoryInterface
             $sourceNewBalance = $source->bankAccount->balance - ($data['amount'] + config('bank.transaction.fee'));
             $source->bankAccount()->lockForUpdate()->update(['balance' => $sourceNewBalance]);
 
+            $sourceTransaction = Transaction::query()->create([
+                'type'   => Transaction::WITHDRAW,
+                'amount' => -$data['amount']
+            ]);
+            TransactionLog::query()->create([
+                'transaction_id'      => $sourceTransaction->id,
+                'source_card_id'      => $source->id,
+                'destination_card_id' => $destination->id
+            ]);
+            //fee
+            $sourceTransactionFee = Transaction::query()->create([
+                'type'   => Transaction::FEE,
+                'amount' => -config('bank.transaction.fee')
+            ]);
+
 
             $destinationNewBalance = $destination->bankAccount->balance + ($data['amount']);
             $destination->bankAccount()->lockForUpdate()->update(['balance' => $destinationNewBalance]);
+            $destinationTransaction = Transaction::query()->create([
+                'type'   => Transaction::DEPOSIT,
+                'amount' => $data['amount']
+            ]);
+            TransactionLog::query()->create([
+                'transaction_id'      => $destinationTransaction->id,
+                'source_card_id'      => $source->id,
+                'destination_card_id' => $destination->id
+            ]);
 
-            //transaction table
-            /** @var Transaction $transaction */
-            $transaction = Transaction::query()
-                ->sharedLock()
-                ->create([
-                    'source_card_id'      => $source->id,
-                    'destination_card_id' => $destination->id,
-                    'amount'              => $data['amount']
-                ]);
-
-            TransactionFee::query()
-                ->create([
-                    'transaction_id' => $transaction->id,
-                    'fee_amount'     => config('bank.transaction.fee')
-                ]);
 
             DB::commit();
 
