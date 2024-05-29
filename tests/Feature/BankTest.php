@@ -94,9 +94,6 @@ class BankTest extends TestCase
             'fee_amount'     => config('bank.transaction.fee')
         ]);
 
-        //validation min , max =>check
-        //validation credit card => check
-        //validation for checking balance
     }
 
 
@@ -135,4 +132,75 @@ class BankTest extends TestCase
             ->json();
 
     }
+
+    public function test_check_max_amount_validations()
+    {
+
+        //---------------------
+        //      prepare Data
+        //---------------------
+        /** @var CreditCard $creditCard */
+        $sourceCreditCard = CreditCard::factory()->create();
+        $sourceBalance = $sourceCreditCard->bankAccount->balance;
+
+
+        /** @var CreditCard $destinationCreditCard */
+        $destinationCreditCard = CreditCard::factory()->create();
+        $destinationBalance = $destinationCreditCard->bankAccount->balance;
+
+        //---------------------
+        //      perform Action
+        //---------------------
+
+        $transferMoney = rand(111, 999) * 1000;
+        $response = $this->postJson(self::URL,
+            [
+                "source_card_number"      => $sourceCreditCard->number,
+                "destination_card_number" => $destinationCreditCard->number,
+                "amount"                  => 500000000
+            ]
+        )
+            ->assertStatus(422)
+            ->assertJson([
+                'message' => 'The amount field must not be greater than 50000000.'
+            ])
+            ->json();
+
+    }
+
+    public function test_check_min_amount_validations()
+    {
+
+        //---------------------
+        //      prepare Data
+        //---------------------
+        /** @var CreditCard $creditCard */
+        $sourceCreditCard = CreditCard::factory()->create();
+        $sourceBalance = $sourceCreditCard->bankAccount->balance;
+
+
+        /** @var CreditCard $destinationCreditCard */
+        $destinationCreditCard = CreditCard::factory()->create();
+        $destinationBalance = $destinationCreditCard->bankAccount->balance;
+
+        //---------------------
+        //      perform Action
+        //---------------------
+
+        $transferMoney = rand(111, 999) * 1000;
+        $response = $this->postJson(self::URL,
+            [
+                "source_card_number"      => $sourceCreditCard->number,
+                "destination_card_number" => $destinationCreditCard->number,
+                "amount"                  => 10
+            ]
+        )
+            ->assertStatus(422)
+            ->assertJson([
+                'message' => 'The amount field must be at least 1000.'
+            ])
+            ->json();
+
+    }
+
 }
