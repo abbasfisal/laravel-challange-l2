@@ -4,6 +4,10 @@ namespace App\Modules\Bank\Services;
 
 
 use App\Modules\Bank\Repositories\BankRepositoryInterface;
+use App\Modules\Sms\Enums\Action;
+use App\Modules\Sms\Enums\Provider;
+use App\Modules\Sms\SmsFactory;
+use Illuminate\Http\JsonResponse;
 
 
 class BankService implements BankServiceInterface
@@ -12,7 +16,7 @@ class BankService implements BankServiceInterface
     {
     }
 
-    public function transfer(array $data)
+    public function transfer(array $data): JsonResponse
     {
 
         $source = $this->repository->GetAccountBy($data['source_card_number']);
@@ -28,15 +32,9 @@ class BankService implements BankServiceInterface
             return response()->json(['message' => 'Transaction failed'], 500);
         }
 
-        return response()->json(['message' => 'Transfer Money successfully'], 201);
+        (new SmsFactory(Provider::KAVENEGAR))->send($result['destination'], Action::DEPOSIT, $data);
+        (new SmsFactory(Provider::KAVENEGAR))->send($result['source'], Action::WITHDRAW, $data);
 
-//        dd((new SmsFactory(Provider::KAVENEGAR))->send($result['destination'], Action::DEPOSIT, $data));
-//        dd((new SmsFactory(Provider::KAVENEGAR))->send($result['source'], Action::WITHDRAW, $data));
-//
-//
-//        (new SmsFactory(Provider::KAVENEGAR))->send($source, Action::WITHDRAW, $data);
-//        (new SmsFactory(Provider::KAVENEGAR))->send($source, Action::DEPOSIT, $data);
-
-
+        return response()->json(['message' => 'Transfer money was successful'], 201);
     }
 }
