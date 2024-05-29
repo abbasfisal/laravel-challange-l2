@@ -12,49 +12,18 @@ if (!function_exists('convertPersianToEnglish')) {
     }
 }
 
-if (!function_exists('validCardBank')) {
-    function validCardBank(): string
+if (!function_exists('generateBankCardNumber')) {
+    function generateBankCardNumber(): string
     {
-        $number = generateBankCardNumber();
-        if (!isValidIranianCardNumber($number)) {
-            validCardBank();
-        }
+        do {
+            $number = mt_rand(1000000000000000, 9999999999999999);
+
+        } while (!isValidIranianCardNumber($number));
+
         return $number;
     }
 }
 
-if (!function_exists('generateBankCardNumber')) {
-    function generateBankCardNumber(): string
-    {
-
-        // Generate the first 15 digits randomly
-        $number = mt_rand(100000000000000, 999999999999999);
-        // Perform the Luhn algorithm to calculate the last digit (checksum)
-        $checksum = 0;
-        $isSecondDigit = false;
-        for ($i = 15; $i >= 0; $i--) {
-            $digit = (int)substr($number, $i, 1);
-
-            if ($isSecondDigit) {
-                $digit *= 2;
-                if ($digit > 9) {
-                    $digit -= 9;
-                }
-            }
-
-            $checksum += $digit;
-            $isSecondDigit = !$isSecondDigit;
-        }
-
-        // Calculate the checksum digit and append it to the number
-        $checksum %= 10;
-        if ($checksum !== 0) {
-            $checksum = 10 - $checksum;
-        }
-
-        return $number . $checksum;
-    }
-}
 if (!function_exists('isValidIranianCardNumber')) {
     function isValidIranianCardNumber($cardNumber)
     {
@@ -66,7 +35,6 @@ if (!function_exists('isValidIranianCardNumber')) {
             return false;
         }
 
-        // Perform the Luhn algorithm to validate the card number
         $checksum = 0;
         for ($i = 0; $i < 16; $i++) {
             $digit = (int)$cardNumber[$i]; // Access each character as a string
@@ -78,7 +46,6 @@ if (!function_exists('isValidIranianCardNumber')) {
             }
             $checksum += $digit;
         }
-
         return ($checksum % 10) === 0;
     }
 
