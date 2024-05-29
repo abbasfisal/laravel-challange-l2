@@ -19,15 +19,19 @@ class CreditCard extends Model
         'number'
     ];
 
-
     public function bankAccount(): BelongsTo
     {
         return $this->belongsTo(BankAccount::class);
     }
 
-    public function transactions(): HasMany
+    public function sourceLogs(): HasMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(TransactionLog::class, 'source_card_id');
+    }
+
+    public function destinationLogs(): HasMany
+    {
+        return $this->hasMany(TransactionLog::class, 'destination_card_id');
     }
 
     protected static function newFactory(): CreditCardFactory

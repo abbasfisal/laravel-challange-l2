@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TransactionFee extends Model
+class TransactionLog extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'transaction_id',
-        'fee_amount'
+        'source_card_id',
+        'destination_card_id',
     ];
 
 
@@ -20,4 +21,15 @@ class TransactionFee extends Model
     {
         return $this->belongsTo(Transaction::class);
     }
+
+    public function sourceCard(): BelongsTo
+    {
+        return $this->belongsTo(CreditCard::class, 'source_card_id');
+    }
+
+    public function destinationCard(): BelongsTo
+    {
+        return $this->belongsTo(CreditCard::class, 'destination_card_id');
+    }
+
 }

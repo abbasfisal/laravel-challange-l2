@@ -10,10 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('transaction_fees', function (Blueprint $table) {
+        Schema::create('transaction_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->references('id')->on('transactions');
-            $table->integer('fee_amount');
+            $table->foreignId('source_card_id')->references('id')->on('credit_cards');
+            $table->foreignId('destination_card_id')->references('id')->on('credit_cards');
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaction_fees');
+        Schema::dropIfExists('transaction_logs');
     }
 };

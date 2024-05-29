@@ -12,31 +12,14 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'source_card_id',
-        'destination_card_id',
+        'type',
         'amount'
     ];
 
 
-    public function creditCard(): BelongsTo
+    public function transactionLogs(): HasMany
     {
-        return $this->belongsTo(CreditCard::class);
-    }
-
-    public function transactionFees(): HasMany
-    {
-        return $this->hasMany(TransactionFee::class);
-    }
-
-
-    public function sourceCard(): BelongsTo
-    {
-        return $this->belongsTo(CreditCard::class, 'source_card_id');
-    }
-
-    public function destinationCard(): BelongsTo
-    {
-        return $this->belongsTo(CreditCard::class, 'destination_card_id');
+        return $this->hasMany(TransactionLog::class);
     }
 
 }
