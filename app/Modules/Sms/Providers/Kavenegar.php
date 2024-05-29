@@ -6,6 +6,7 @@ use App\Models\CreditCard;
 use App\Modules\Sms\Contracts\SmsInterface;
 use App\Modules\Sms\Enums\Action;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Kavenegar implements SmsInterface
 {
@@ -22,9 +23,9 @@ class Kavenegar implements SmsInterface
             $prepare['message'] = sprintf("Withdraw+transaction fee: %s + %s , current balance is: %s", $data['amount'], config('bank.transaction.fee'), $creditCard->bankAccount->balance);
         }
 
-dd($prepare);
-        //todo: add retry or try catch
-        Http::retry(3)->get(env('KAVENEGAR_URL'), $prepare);
+        Log::info('Kavenegar sent sms', [$prepare]);
+
+        //Http::retry(3)->get(env('KAVENEGAR_URL'), $prepare);
 
     }
 }
