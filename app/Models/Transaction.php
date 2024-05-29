@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Transaction extends Model
 {
+    const DEPOSIT = 1;
+    const WITHDRAW = 2;
+    const FEE = 3;
+
     use HasFactory;
 
     protected $fillable = [
