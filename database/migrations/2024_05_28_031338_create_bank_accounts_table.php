@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users');
             $table->unsignedBigInteger('balance');
-            $table->string('number'); //we assume 10 character
+            $table->char('number', 10); //we assume 10 character
             $table->timestamps();
         });
     }
