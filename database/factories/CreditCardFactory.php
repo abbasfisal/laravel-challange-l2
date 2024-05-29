@@ -18,12 +18,10 @@ class CreditCardFactory extends Factory
      */
     public function definition(): array
     {
-
-        $valid = ['6037697514868204', '6395991179379862', '6362141808807854'];
-
+        //$valid = ['6037697514868204', '6395991179379862', '6362141808807854'];
         return [
             'bank_account_id' => BankAccount::factory(),
-            'number'          => $valid[rand(0,count($valid)-1)]
+            'number'          => generateBankCardNumber()
         ];
     }
 }
