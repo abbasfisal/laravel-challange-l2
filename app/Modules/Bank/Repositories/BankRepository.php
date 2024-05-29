@@ -11,18 +11,10 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class BankRepository implements BankRepositoryInterface
 {
-    public function __construct()
-    {
-    }
-
-    public function a()
-    {
-        dd('inside repos');
-    }
-
     public function GetAccountBy($creditCardNumber)
     {
         /** @var CreditCard $card */
@@ -32,7 +24,7 @@ class BankRepository implements BankRepositoryInterface
             ->first();
     }
 
-    public function updateBalance(array $data): bool|array
+    public function updateBalance(array $data): array
     {
 
         DB::beginTransaction();
@@ -84,7 +76,8 @@ class BankRepository implements BankRepositoryInterface
             Log::critical('Transaction Failed', ['message' => $e->getMessage(), 'code' => $e->getCode(), 'data' => $data]);
             DB::rollBack();
 
-            return false;
+            throw ValidationException::withMessages(['transfer' => 'Transaction failed']);
+
         }
     }
 
