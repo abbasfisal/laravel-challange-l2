@@ -15,9 +15,6 @@ return new class extends Migration {
             $table->foreignId('source_card_id')->references('id')->on('credit_cards');
             $table->foreignId('destination_card_id')->references('id')->on('credit_cards');
             $table->decimal('amount', 15, 2);
-//            $table->decimal('fee');
-//            $table->unsignedTinyInteger('status');
-
             $table->timestamps();
         });
     }
