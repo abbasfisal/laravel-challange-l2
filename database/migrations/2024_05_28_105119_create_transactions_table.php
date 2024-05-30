@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('credit_card_id')->references('id')->on('credit_cards');
             $table->smallInteger('type');//deposit , withdraw , fee
             $table->decimal('amount', 15, 2);
             $table->timestamps();

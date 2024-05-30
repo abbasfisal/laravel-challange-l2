@@ -16,9 +16,15 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
+        'credit_card_id',
         'type',
         'amount'
     ];
+
+    public function creditCard(): BelongsTo
+    {
+        return $this->belongsTo(CreditCard::class);
+    }
 
 
     public function transactionLogs(): HasMany

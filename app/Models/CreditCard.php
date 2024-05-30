@@ -15,13 +15,24 @@ class CreditCard extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'bank_account_id',
         'number'
     ];
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function bankAccount(): BelongsTo
     {
         return $this->belongsTo(BankAccount::class);
+    }
+
+    public function transaction(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
     }
 
     public function sourceLogs(): HasMany
