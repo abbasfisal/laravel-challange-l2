@@ -20,7 +20,7 @@ class BankService implements BankServiceInterface
      */
     public function transfer(array $data)
     {
-        $source = $this->repository->GetAccountBy($data['source_card_number']);
+        $source = $this->repository->getAccountBy($data['source_card_number']);
         $balance = $source->bankAccount->balance;
 
         if ($balance < ($data['amount'] + config('bank.transaction.fee'))) {

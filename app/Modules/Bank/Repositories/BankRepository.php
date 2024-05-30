@@ -5,6 +5,7 @@ namespace App\Modules\Bank\Repositories;
 use App\Models\CreditCard;
 use App\Models\Transaction;
 use App\Models\TransactionLog;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -12,11 +13,10 @@ use Illuminate\Validation\ValidationException;
 
 class BankRepository implements BankRepositoryInterface
 {
-    public function GetAccountBy($creditCardNumber)
+    public function getAccountBy($creditCardNumber)
     {
         /** @var CreditCard $card */
         return CreditCard::query()
-            ->with('bankAccount.user')
             ->where('number', $creditCardNumber)
             ->first();
     }
@@ -29,20 +29,19 @@ class BankRepository implements BankRepositoryInterface
 
         DB::beginTransaction();
         try {
-            //decrease source
             /** @var CreditCard $source */
-            $source = $this->GetAccountBy($data['source_card_number']);
+            $source = $this->getAccountBy($data['source_card_number']);
 
             /** @var CreditCard $destination */
-            $destination = $this->GetAccountBy($data['destination_card_number']);
-
+            $destination = $this->getAccountBy($data['destination_card_number']);
 
             $sourceNewBalance = $source->bankAccount->balance - ($data['amount'] + config('bank.transaction.fee'));
             $source->bankAccount()->lockForUpdate()->update(['balance' => $sourceNewBalance]);
 
             $sourceTransaction = Transaction::query()->create([
-                'type'   => Transaction::WITHDRAW,
-                'amount' => -$data['amount']
+                'credit_card_id' => $source->id,
+                'type'           => Transaction::WITHDRAW,
+                'amount'         => -$data['amount']
             ]);
             TransactionLog::query()->create([
                 'transaction_id'      => $sourceTransaction->id,
@@ -51,16 +50,18 @@ class BankRepository implements BankRepositoryInterface
             ]);
             //fee
             $sourceTransactionFee = Transaction::query()->create([
-                'type'   => Transaction::FEE,
-                'amount' => -config('bank.transaction.fee')
+                'credit_card_id' => $source->id,
+                'type'           => Transaction::FEE,
+                'amount'         => -config('bank.transaction.fee')
             ]);
 
 
             $destinationNewBalance = $destination->bankAccount->balance + ($data['amount']);
             $destination->bankAccount()->lockForUpdate()->update(['balance' => $destinationNewBalance]);
             $destinationTransaction = Transaction::query()->create([
-                'type'   => Transaction::DEPOSIT,
-                'amount' => $data['amount']
+                'credit_card_id' => $destination->id,
+                'type'           => Transaction::DEPOSIT,
+                'amount'         => $data['amount']
             ]);
             TransactionLog::query()->create([
                 'transaction_id'      => $destinationTransaction->id,
@@ -86,7 +87,6 @@ class BankRepository implements BankRepositoryInterface
             DB::rollBack();
 
             throw ValidationException::withMessages(['transfer' => 'Transaction failed']);
-
         }
     }
 

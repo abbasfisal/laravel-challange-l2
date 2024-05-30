@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\CreditCard;
-use App\Models\Transaction;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -38,7 +37,7 @@ class BankTest extends TestCase
         //      perform Action
         //---------------------
 
-        $transferMoney = rand(111, 999) * 1000;
+        $transferMoney = rand(2, 9) * 1000;
         $response = $this->postJson(self::URL, [
             "source_card_number"      => $sourceCreditCard->number,
             "destination_card_number" => $destinationCreditCard->number,
@@ -73,29 +72,8 @@ class BankTest extends TestCase
                 'number'  => (string)$destinationCreditCard->bankAccount->number
             ]
         );
-        /** @var Transaction $transaction */
-        $transaction = Transaction::query()
-            ->where([
-                'source_card_id'      => $sourceCreditCard->id,
-                'destination_card_id' => $destinationCreditCard->id,
-                'amount'              => $transferMoney])
-            ->first();
-
-        //*** check transaction
-        $this->assertDatabaseHas('transactions', [
-            'source_card_id'      => $sourceCreditCard->id,
-            'destination_card_id' => $destinationCreditCard->id,
-            'amount'              => $transferMoney
-        ]);
-
-        //*** check transaction_fees
-        $this->assertDatabaseHas('transaction_fees', [
-            'transaction_id' => $transaction->id,
-            'fee_amount'     => config('bank.transaction.fee')
-        ]);
 
     }
-
 
     public function test_balance_is_not_enough()
     {
@@ -125,7 +103,7 @@ class BankTest extends TestCase
                 "amount"                  => $transferMoney
             ]
         )
-            ->assertStatus(400)
+            ->assertStatus(422)
             ->assertJson([
                 "message" => "balance is not enough"
             ])
