@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\BankAccount;
 use App\Models\CreditCard;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,6 +22,9 @@ class CreditCardFactory extends Factory
         //$valid = ['6037697514868204', '6395991179379862', '6362141808807854'];
         return [
             'bank_account_id' => BankAccount::factory(),
+            'user_id'         => function (array $attributes) {
+                return BankAccount::query()->find($attributes['bank_account_id'])->user_id;
+            },
             'number'          => generateBankCardNumber()
         ];
     }

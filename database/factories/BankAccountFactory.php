@@ -19,7 +19,7 @@ class BankAccountFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'balance' => rand(111111, 999999) * 1000,
+            'balance' => rand(4, 9) * 100000,
             'number'  => rand(1111111111, 9999999999) //10 digit for meli bank
         ];
     }
