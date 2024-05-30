@@ -6,7 +6,6 @@ namespace App\Modules\Bank\Services;
 use App\Jobs\SmsNotification;
 use App\Modules\Bank\Repositories\BankRepositoryInterface;
 use App\Modules\Sms\Enums\Action;
-use App\Modules\Sms\SmsFactory;
 use Illuminate\Validation\ValidationException;
 
 
@@ -30,9 +29,9 @@ class BankService implements BankServiceInterface
 
         $result = $this->repository->updateBalance($data);
 
-        SmsFactory::send($result['source'], Action::WITHDRAW, $data);
-        SmsFactory::send($result['destination'], Action::DEPOSIT, $data);
 
+        SmsNotification::dispatch($result['source'], Action::WITHDRAW, $data);
+        SmsNotification::dispatch($result['destination'], Action::DEPOSIT, $data);
     }
 
     public function getTopUserByTransactions()
