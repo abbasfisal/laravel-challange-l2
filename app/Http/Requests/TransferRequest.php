@@ -7,18 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class TransferRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        //change to middleware
-        $this->merge([
-            'source_card_number'      => (int)convertPersianToEnglish($this->request->get('source_card_number')),
-            'destination_card_number' => (int)convertPersianToEnglish($this->request->get('destination_card_number')),
-            'amount'                  => (int)convertPersianToEnglish($this->request->get('amount')),
-        ]);
-
-
-    }
-
     public function rules(): array
     {
         return [
