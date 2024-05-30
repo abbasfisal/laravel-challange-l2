@@ -26,10 +26,8 @@ class Transaction extends Model
         return $this->belongsTo(CreditCard::class);
     }
 
-
-    public function transactionLogs(): HasMany
+    public function logs(): HasMany
     {
         return $this->hasMany(TransactionLog::class);
     }
-
 }
