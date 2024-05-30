@@ -8,8 +8,8 @@ class BankUnitTest extends TestCase
 {
     public function test_convert_Persian_To_English()
     {
-        $converted = convertPersianToEnglish("۱۲۳۴۵۶۷۸۹");
-        $convertedMix = convertPersianToEnglish("۱۲3۴۵۶۷89");
+        $converted = convertNoneEngToEngNumber("۱۲۳۴۵۶۷۸۹");
+        $convertedMix = convertNoneEngToEngNumber("۱۲3۴۵۶۷89");
 
         //
         $this->assertEquals("123456789", $converted);
