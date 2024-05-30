@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\TransactionLog;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -90,43 +91,36 @@ class BankRepository implements BankRepositoryInterface
         }
     }
 
-    public function getLatestTenMinuteTransactions(): Collection|array
+    public function getLatestTenMinuteTransactions()
     {
-
-        //get transactions by time
-        /** @var Transaction $recentTransactions */
-        $recentTransactions = Transaction::query()->where('created_at', '>=', Carbon::now()->subMinutes(10))->get();
+        $tenMinutesAgo = Carbon::now()->subMinutes(10);
 
 
-        //group transaction by user
-        $userTransactionCounts = $recentTransactions->groupBy(function ($transaction) {
-            return $transaction->sourceCard->bankAccount->user_id;
-        })->map(function ($transactions, $userId) {
+        $users = User::withCount(['transactions' => function ($query) use ($tenMinutesAgo) {
+            $query
+                ->where('type', '!=', Transaction::FEE)
+                ->where('transactions.created_at', '>=', $tenMinutesAgo);
+        }])
+            ->orderBy('transactions_count', 'desc')
+            ->take(3)
+            ->get();
+
+
+        $result = $users->map(function ($user) {
+            $transactions = $user->transactions()
+                ->where('type', '!=', Transaction::FEE)
+                ->orderBy('created_at', 'desc')
+                ->take(10)
+                ->get();
+
             return [
-                'user_id' => $userId,
-                'count'   => $transactions->count()
+                'user'         => $user,
+                'transactions' => $transactions
             ];
-        })->sortByDesc('count')->take(3);
-
-
-        $result = [];
-
-        foreach ($userTransactionCounts as $user) {
-            $userId = $user['user_id'];
-            $userModel = User::query()->find($userId);
-            $lastTenTransactions = Transaction::query()->whereHas('sourceCard.bankAccount', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })->orWhereHas('destinationCard.bankAccount', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })->orderBy('created_at', 'desc')->take(10)->get();
-
-            $result[] = [
-                'user'         => $userModel,
-                'transactions' => $lastTenTransactions
-            ];
-        }
+        });
 
         return $result;
     }
+
 }
 

@@ -12,7 +12,7 @@ class TopUserTransactions extends ResourceCollection
     {
         return [
             'user'         => new UserResource($this['user']),
-            'transactions' => TransactionResource::collection($this['transactions']),
+            'transactions' => TransactionResource::collection($this['transactions'])
         ];
     }
 }
