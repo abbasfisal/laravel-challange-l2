@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('credit_cards', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('bank_account_id')->references('id')->on('bank_accounts');
             $table->char('number', 16); //16 character
             $table->timestamps();
